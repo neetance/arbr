@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {DEX} from "../src/arbrMaster.sol";
+import {DEX} from "./arbrMaster.sol";
 import {IVault} from "../node_modules/@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
 import {IManagedPool} from "../node_modules/@balancer-labs/v2-interfaces/contracts/pool-utils/IManagedPool.sol";
 import {IERC20} from "../node_modules/@balancer-labs/v2-interfaces/contracts/solidity-utils/openzeppelin/IERC20.sol";
@@ -10,7 +10,7 @@ import {IUniswapV2Pair} from "../lib/v2-core/contracts/interfaces/IUniswapV2Pair
 
 contract PriceFetcher {
     address balancerVault;
-    address uniswapv2;
+    address uniswapv2FactoryAddr;
     address sushiswap;
 
     IVault vault;
@@ -36,7 +36,9 @@ contract PriceFetcher {
         address tokenA,
         address tokenB
     ) internal view returns (uint256) {
-        IUniswapV2Factory uniswapv2Factory = IUniswapV2Factory(uniswapv2);
+        IUniswapV2Factory uniswapv2Factory = IUniswapV2Factory(
+            uniswapv2FactoryAddr
+        );
         address pairAddr = uniswapv2Factory.getPair(tokenA, tokenB);
         IUniswapV2Pair uniswapV2pair = IUniswapV2Pair(pairAddr);
 

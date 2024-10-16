@@ -28,35 +28,38 @@ contract ArbrMaster is Ownable {
     function execute(
         address tokenA,
         address tokenB,
-        uint256 amountIn,
+        uint256 minProfit,
         uint256 dex1,
         uint256 dex2,
         address user,
         uint256 poolId
     ) external onlyOwner {
         if (msg.sender != proxy) revert Not_Allowed_To_Call_Given_Method();
-        DEX dex;
+        DEX Dex1;
+        DEX Dex2;
 
-        if (dex1 == 1) dex = DEX.UNISWAP;
-        else if (dex1 == 2) dex = DEX.SUSHISWAP;
-        else dex = DEX.BALANCER;
+        if (dex1 == 1) Dex1 = DEX.UNISWAP;
+        else if (dex1 == 2) Dex1 = DEX.SUSHISWAP;
+        else Dex1 = DEX.BALANCER;
 
         uint256 priceAwrtB1 = priceFetcher.getPrice(
             tokenA,
             tokenB,
-            dex,
+            Dex1,
             poolId
         );
 
-        if (dex2 == 1) dex = DEX.UNISWAP;
-        else if (dex2 == 2) dex = DEX.SUSHISWAP;
-        else dex = DEX.BALANCER;
+        if (dex2 == 1) Dex2 = DEX.UNISWAP;
+        else if (dex2 == 2) Dex2 = DEX.SUSHISWAP;
+        else Dex2 = DEX.BALANCER;
 
         uint256 priceAwrtB2 = priceFetcher.getPrice(
             tokenA,
             tokenB,
-            dex,
+            Dex2,
             poolId
         );
+
+        if (priceAwrtB1 > priceAwrtB2) {}
     }
 }
