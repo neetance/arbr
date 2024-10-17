@@ -23,8 +23,12 @@ contract ArbrSwap {
         uint256 amountIn,
         uint256 poolId,
         address user
-    ) external {
+    ) external returns (uint256 amountOut) {
         if (msg.sender != master) revert ARBR_FORBIDDEN();
+
+        if (dex == DEX.UNISWAP) amountOut = swapUniswap(tokenIn, tokenOut, amountIn, user);
+        else if (dex == DEX.SUSHISWAP) amountOut = swapSushiswap(tokenIn, tokenOut, user);
+        else amountOut swapBalancer(tokenIn, tokenOut, poolId, amountIn, user);
     }
 
     function swapUniswap(
@@ -32,19 +36,21 @@ contract ArbrSwap {
         address tokenOut,
         uint256 amountIn,
         address user
-    ) internal {
+    ) internal returns (uint256) {
         address[] path;
         path.push(tokenIn);
         path.push(tokenOut);
 
         UniswapV2Router02 router = UniswapV2Router02(routerAddr);
-        router.swapExactTokensForTokens(
+        uint256 memory amounts[] = router.swapExactTokensForTokens(
             amountIn,
             0,
             path,
             user,
             block.timestamp + 30 seconds
         );
+
+        return amounts[1];
     }
 
     function swapBalancer(
@@ -53,7 +59,7 @@ contract ArbrSwap {
         uint256 poolId,
         uint256 amountIn,
         address user
-    ) internal {
+    ) internal returns (uint256) {
         IVault vault = IVault(vaultAddr);
         vault.SingleSwap memory swapInstance = vault.SingleSwap({
             poolId: poolId,
@@ -71,7 +77,8 @@ contract ArbrSwap {
             toInternalBalance: false
         });
 
-        vault.swap(swapInstance, funds, 0, block.timestamp + 30 seconds);
+        uint256 amountOut = vault.swap(swapInstance, funds, 0, block.timestamp + 30 seconds);
+        return amountOut;
     }
 
     function swapSushiswap(
